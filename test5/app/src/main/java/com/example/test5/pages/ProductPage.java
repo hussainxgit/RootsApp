@@ -46,7 +46,7 @@ public class ProductPage extends AppCompatActivity {
                 .error(R.drawable.placeholder)
                 .into(productImage);
 
-        final cartItem cartItem = new cartItem(productNameExtra, Double.parseDouble(productpriceExtra), 1);
+        final cartItem cartItem = new cartItem(productNameExtra, Double.parseDouble(productpriceExtra), 1, productImageExtra);
 
         addCartItemBtn.setOnClickListener(new View.OnClickListener() {
             @Override

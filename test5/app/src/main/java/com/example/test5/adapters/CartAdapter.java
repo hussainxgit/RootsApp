@@ -2,6 +2,7 @@ package com.example.test5.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,9 +33,12 @@ public class CartAdapter extends RecyclerView.Adapter {
     List<cartItem> cartItems;
     Context context;
 
-    public CartAdapter(List<cartItem> cartItems, Context context) {
+    private static final String TAG = "MyActivity";
+
+    public CartAdapter(List<cartItem> cartItems, Context context, double cartItemsPrice) {
         this.cartItems = cartItems;
         this.context = context;
+        this.cartItemsPrice = cartItemsPrice;
     }
 
     @NonNull
@@ -44,15 +48,24 @@ public class CartAdapter extends RecyclerView.Adapter {
         return new ItemViewHolder(itemView);
     }
 
-
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
         final cartDatabase appDP = cartDatabase.getInstance(context);
-        // Update cart items price
-        cartItemsPrice = cartItemsPrice+cartItems.get(position).getProductPrice();
-        ((ShoppingCart)context).setCartTotalPrice(cartItemsPrice);
-        Log.e(context+"", cartItemsPrice+"");
+
+        if (cartItems.get(position).getProductQuantity() >= 1) {
+            for (int i = 1; i <= cartItems.get(position).getProductQuantity(); i++) {
+                ((ShoppingCart) context).setCartTotalPrice(cartItemsPrice += cartItems.get(position).getProductPrice());
+            }
+        } else {
+            ((ShoppingCart) context).setCartTotalPrice(cartItemsPrice += cartItems.get(position).getProductPrice());
+        }
+
+        Picasso.get()
+                .load(cartItems.get(position).getProductImg())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder)
+                .into(itemViewHolder.productImg);
 
         itemViewHolder.productName.setText(cartItems.get(position).getProductName());
         itemViewHolder.productPrice.setText(cartItems.get(position).getProductPrice() + "");
@@ -60,49 +73,87 @@ public class CartAdapter extends RecyclerView.Adapter {
         itemViewHolder.cartItemDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final cartItem cartItemRedo = new cartItem(cartItems.get(position).getProductName(), cartItems.get(position).getProductPrice(), cartItems.get(position).getProductQuantity());
+                final cartItem cartItemRedo = new cartItem(cartItems.get(position).getProductName(),
+                        cartItems.get(position).getProductPrice(),
+                        cartItems.get(position).getProductQuantity(),
+                        cartItems.get(position).getProductImg());
+
                 if (cartItems.size() != 0) {
-                    cartItemsPrice = cartItemsPrice-cartItems.get(position).getProductPrice();
-                    ((ShoppingCart)context).setCartTotalPrice(cartItemsPrice);
+                    Log.e(TAG, cartItemRedo.getId()+" - "+cartItems.get(position).getId());
+                    cartItemsPrice = cartItemsPrice - cartItems.get(position).getProductPrice();
+                    ((ShoppingCart) context).setCartTotalPrice(cartItemsPrice);
                     cartItems.remove(position);
-                    appDP.cartDao().deleteCartItem(cartItemRedo.getProductName());
+                    appDP.cartDao().deleteCartItem(cartItems.get(position).getId());
                     notifyDataSetChanged();
                 }
+
                 Snackbar snackbar = Snackbar
                         .make(view, "Wow you deleted item", Snackbar.LENGTH_LONG)
                         .setAction("Redo", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
+                                cartItemsPrice = cartItemsPrice + cartItemRedo.getProductPrice();
                                 cartItems.add(cartItemRedo);
                                 appDP.cartDao().insertCartItem(cartItemRedo);
-                                Log.e(context+"", cartItemsPrice+"");
-                                cartItemsPrice = cartItemsPrice+cartItems.get(position).getProductPrice();
-                                ((ShoppingCart)context).setCartTotalPrice(cartItemsPrice);
+                                ((ShoppingCart) context).setCartTotalPrice(cartItemsPrice);
                                 notifyDataSetChanged();
                             }
                         });
                 snackbar.show();
             }
         });
+        itemViewHolder.increaseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                appDP.cartDao().updateCartItem(cartItems.get(position).getProductQuantity() + 1, cartItems.get(position).getId());
+                cartItems.get(position).setProductQuantity(cartItems.get(position).getProductQuantity() + 1);
+                itemViewHolder.productQuantity.setText(cartItems.get(position).getProductQuantity() + "");
+
+                cartItemsPrice = cartItemsPrice + cartItems.get(position).getProductPrice();
+                ((ShoppingCart) context).setCartTotalPrice(cartItemsPrice);
+            }
+        });
+        itemViewHolder.decreaseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (cartItems.get(position).getProductQuantity() > 1) {
+                    appDP.cartDao().updateCartItem(cartItems.get(position).getProductQuantity() - 1, cartItems.get(position).getId());
+                    cartItems.get(position).setProductQuantity(cartItems.get(position).getProductQuantity() - 1);
+                    itemViewHolder.productQuantity.setText(cartItems.get(position).getProductQuantity() + "");
+
+                    cartItemsPrice = cartItemsPrice - cartItems.get(position).getProductPrice();
+                    ((ShoppingCart) context).setCartTotalPrice(cartItemsPrice);
+
+                }
+            }
+        });
     }
+
     @Override
     public int getItemCount() {
         return cartItems.size();
     }
+
     private static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView productName;
         TextView productPrice;
+        ImageView productImg;
         EditText productQuantity;
         ImageButton cartItemDelete;
         RelativeLayout cartLayout;
+        ImageButton increaseBtn;
+        ImageButton decreaseBtn;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
-            productName = (TextView) itemView.findViewById(R.id.productName);
-            productPrice = (TextView) itemView.findViewById(R.id.productPrice);
-            productQuantity = (EditText) itemView.findViewById(R.id.productQuantity);
-            cartItemDelete = (ImageButton) itemView.findViewById(R.id.cartItemDelete);
-            cartLayout = (RelativeLayout) itemView.findViewById(R.id.cartLayout);
+            productName = itemView.findViewById(R.id.productName);
+            productPrice = itemView.findViewById(R.id.productPrice);
+            productQuantity = itemView.findViewById(R.id.productQuantity);
+            cartItemDelete = itemView.findViewById(R.id.cartItemDelete);
+            cartLayout = itemView.findViewById(R.id.cartLayout);
+            productImg = itemView.findViewById(R.id.productImg);
+            increaseBtn = itemView.findViewById(R.id.increaseBtn);
+            decreaseBtn = itemView.findViewById(R.id.decreaseBtn);
         }
     }
 }

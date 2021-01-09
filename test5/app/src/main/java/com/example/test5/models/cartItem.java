@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity (tableName = "cartItem")
+@Entity(tableName = "cartItem")
 public class cartItem {
     @PrimaryKey(autoGenerate = true)
     private int id;
@@ -18,10 +18,14 @@ public class cartItem {
     @ColumnInfo(name = "productQuantity")
     private int productQuantity;
 
-    public cartItem(String productName, double productPrice, int productQuantity) {
+    @ColumnInfo(name = "productImg")
+    private String productImg;
+
+    public cartItem(String productName, double productPrice, int productQuantity, String productImg) {
         this.productName = productName;
         this.productPrice = productPrice;
         this.productQuantity = productQuantity;
+        this.productImg = productImg;
     }
 
     public int getId() {
@@ -54,5 +58,13 @@ public class cartItem {
 
     public void setProductQuantity(int productQuantity) {
         this.productQuantity = productQuantity;
+    }
+
+    public String getProductImg() {
+        return productImg;
+    }
+
+    public void setProductImg(String productImg) {
+        this.productImg = productImg;
     }
 }

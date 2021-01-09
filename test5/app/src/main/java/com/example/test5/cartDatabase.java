@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase;
 import com.example.test5.interfaces.cartDao;
 import com.example.test5.models.cartItem;
 
-@Database(entities = cartItem.class, exportSchema = false, version = 1)
+@Database(entities = cartItem.class, exportSchema = false, version = 2)
 public abstract class cartDatabase extends RoomDatabase {
     private static final String DB_NAME = "cartItem";
     public static cartDatabase instance;

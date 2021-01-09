@@ -34,7 +34,7 @@ public class ShoppingCart extends AppCompatActivity {
         cartItems = appDP.cartDao().getCartItems();
 //        cartTotalPrice = appDP.cartDao().getTotalPrice();
 
-        productsListView = (RecyclerView) findViewById(R.id.rv_cart);
+        productsListView = findViewById(R.id.rv_cart);
 
         // Attach the adapter to the recyclerview to populate items
         productsListView.setHasFixedSize(true);
@@ -43,19 +43,18 @@ public class ShoppingCart extends AppCompatActivity {
         productsListView.setLayoutManager(new LinearLayoutManager(ShoppingCart.this));
 
         // That's all! :(
-        ca = new CartAdapter(cartItems, ShoppingCart.this);
+        ca = new CartAdapter(cartItems, ShoppingCart.this, cartTotalPrice);
         productsListView.setAdapter(ca);
 
         // Calculate all cart items
         cartItemsPrice = findViewById(R.id.cartTotalItemsPrice);
-
-        cartItemsPrice.setText("$"+cartTotalPrice+"");
+        cartItemsPrice.setText("$" + cartTotalPrice + "");
 
     }
 
     public void setCartTotalPrice(double cartTotalPrice) {
         this.cartTotalPrice = cartTotalPrice;
-        cartItemsPrice.setText("$"+cartTotalPrice+"");
+        cartItemsPrice.setText("$" + cartTotalPrice + "");
     }
 
 }

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter {
-    private static final int TYPE_ITEM = 1;
     List<Product> productArray;
     Context context;
     String imgUrl;
@@ -44,8 +43,6 @@ public class ProductAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         //todo: fix position
-        if (holder instanceof ItemViewHolder) {
-
             ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
             imgUrl = "http://10.0.2.2:5000/static"+productArray.get(position).getProductImage();
             Picasso.get()
@@ -67,19 +64,12 @@ public class ProductAdapter extends RecyclerView.Adapter {
                     context.startActivity(intent);
                 }
             });
-        }
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return TYPE_ITEM;
     }
 
     @Override
     public int getItemCount() {
         return productArray.size();
     }
-
 
     private static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView productName;
@@ -89,10 +79,10 @@ public class ProductAdapter extends RecyclerView.Adapter {
 
         public ItemViewHolder(View itemView) {
             super(itemView);
-            productName = (TextView) itemView.findViewById(R.id.productName);
-            productPrice = (TextView) itemView.findViewById(R.id.productPrice);
-            productDescription = (TextView) itemView.findViewById(R.id.productDescription);
-            productImage = (ImageView) itemView.findViewById(R.id.productImage);
+            productName = itemView.findViewById(R.id.productName);
+            productPrice = itemView.findViewById(R.id.productPrice);
+            productDescription = itemView.findViewById(R.id.productDescription);
+            productImage = itemView.findViewById(R.id.productImage);
         }
     }
 }
